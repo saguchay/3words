@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3-Letter Words - Easy Learn</title>
+    <style>
+        :root {
+            --primary: #ff7f50;
+            --bg: #fff9f0;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            margin: 0;
+            background-color: var(--bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* STICKY TOP DISPLAY */
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            background: white;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+            border-bottom: 6px solid var(--primary);
+        }
+
+        #display-emoji {
+            font-size: 5rem;
+            margin: 0;
+            line-height: 1;
+        }
+
+        #display-word {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+        }
+
+        /* GRID AREA */
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .word-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .word-card {
+            aspect-ratio: 1/1;
+            background: white;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 3px solid #ffeaa7;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .word-card:active {
+            transform: scale(0.9);
+            background-color: #fff4e1;
+            border-color: var(--primary);
+        }
+
+        .mini-emoji { font-size: 2.5rem; }
+        .mini-text { font-size: 1rem; font-weight: bold; color: #555; margin-top: 5px; }
+
+        /* Animation */
+        .bounce { animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            .word-grid { grid-template-columns: repeat(3, 1fr); }
+            #display-emoji { font-size: 4rem; }
+            #display-word { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sticky-header">
+        <div id="display-emoji">🎒</div>
+        <div id="display-word">TAP A WORD</div>
+    </div>
+
+    <div class="container">
+        <div class="word-grid" id="main-grid"></div>
+    </div>
+
+    <script>
+        // Data corrected: "Bat" is now fixed, all words are 3 letters
+        const words = [
+            {w: 'Ant', i: '🐜'}, {w: 'Bat', i: '🦇'}, {w: 'Cat', i: '🐱'}, {w: 'Dog', i: '🐶'}, 
+            {w: 'Egg', i: '🥚'}, {w: 'Fan', i: '𖣘'}, {w: 'Gum', i: '🍬'}, {w: 'Hat', i: '🎩'}, 
+            {w: 'Ice', i: '🧊'}, {w: 'Jar', i: '🫙'}, {w: 'Key', i: '🔑'}, {w: 'Log', i: '🪵'}, 
+            {w: 'Map', i: '🗺️'}, {w: 'Net', i: '🕸️'}, {w: 'Owl', i: '🦉'}, {w: 'Pig', i: '🐷'}, 
+            {w: 'Sun', i: '☀️'}, {w: 'Rat', i: '🐀'}, {w: 'Sky', i: '☁️'}, {w: 'Toy', i: '🧸'}, 
+            {w: 'Van', i: '🚐'}, {w: 'Box', i: '📦'}, {w: 'Yak', i: '🐂'}, {w: 'Zip', i: '🤐'},
+            {w: 'Bed', i: '🛏️'}, {w: 'Bus', i: '🚌'}, {w: 'Cup', i: '🥤'}, {w: 'Fly', i: '🪰'},
+            {w: 'Jam', i: '🍓'}, {w: 'Lip', i: '👄'}, {w: 'Mop', i: '🧹'}, {w: 'Pen', i: '🖊️'},
+            {w: 'Pot', i: '🪴'}, {w: 'Sub', i: '🚢'}, {w: 'Tap', i: '🚰'}, {w: 'Ten', i: '🔟'},
+            {w: 'Tie', i: '👔'}, {w: 'Top', i: '🔝'}, {w: 'Tub', i: '🛁'}, {w: 'Wig', i: '🧔'},
+            {w: 'Web', i: '🕸️'}, {w: 'Dig', i: '⛏️'}, {w: 'Fix', i: '🔧'}, {w: 'Run', i: '🏃'},
+            {w: 'Sit', i: '🪑'}, {w: 'Mix', i: '🥣'}, {w: 'Leg', i: '🦵'}, {w: 'Arm', i: '💪'},
+            {w: 'Axe', i: '🪓'}, {w: 'One', i: '1️⃣'}
+        ];
+
+        const grid = document.getElementById('main-grid');
+        const displayEmoji = document.getElementById('display-emoji');
+        const displayWord = document.getElementById('display-word');
+
+        function playWord(item) {
+            // Speech
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(item.w);
+            msg.lang = 'en-US';
+            msg.rate = 0.85; // Slightly slower for better learning
+            window.speechSynthesis.speak(msg);
+
+            // Update Sticky Header
+            displayEmoji.innerText = item.i;
+            displayWord.innerText = item.w;
+
+            // Animation
+            displayEmoji.classList.remove('bounce');
+            void displayEmoji.offsetWidth; 
+            displayEmoji.classList.add('bounce');
+        }
+
+        // Build the grid
+        words.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'word-card';
+            card.innerHTML = `
+                <div class="mini-emoji">${item.i}</div>
+                <div class="mini-text">${item.w}</div>
+            `;
+            card.onclick = () => playWord(item);
+            grid.appendChild(card);
+        });
+    </script>
+</body>
+</html>
